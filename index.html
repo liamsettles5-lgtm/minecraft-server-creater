@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✦ NEXUS CHAT ✦</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap');
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
+        .chat-bg { background: linear-gradient(145deg, #0a0a0a, #1a1a2e); }
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #6b21a8; border-radius: 20px; }
+    </style>
+</head>
+<body class="bg-black text-white overflow-hidden h-screen flex flex-col">
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-950 via-black to-black">
+        <div class="bg-zinc-900 p-10 rounded-3xl shadow-2xl w-full max-w-md border border-purple-500/30">
+            <h1 class="title-font text-5xl font-bold text-center mb-2 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">NEXUS</h1>
+            <p class="text-center text-zinc-400 mb-8">The ultimate chat experience</p>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-sm text-zinc-400 mb-1">EMAIL</label>
+                    <input id="email" type="email" class="w-full bg-zinc-800 border border-zinc-700 focus:border-purple-500 rounded-2xl px-5 py-4 outline-none text-lg" placeholder="you@email.com">
+                </div>
+                <div>
+                    <label class="block text-sm text-zinc-400 mb-1">PASSWORD</label>
+                    <input id="password" type="password" class="w-full bg-zinc-800 border border-zinc-700 focus:border-purple-500 rounded-2xl px-5 py-4 outline-none text-lg" placeholder="••••••••">
+                </div>
+                
+                <div class="flex gap-4">
+                    <button onclick="register()" class="flex-1 bg-zinc-800 hover:bg-zinc-700 text-white py-4 rounded-2xl font-semibold transition">REGISTER</button>
+                    <button onclick="login()" class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 py-4 rounded-2xl font-semibold transition">LOGIN</button>
+                </div>
+            </div>
+            <p class="text-center text-xs text-zinc-500 mt-8">why are you looking at a useless text gng</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP -->
+    <div id="main-app" class="hidden flex h-screen">
+        <!-- SIDEBAR -->
+        <div class="w-80 bg-zinc-950 border-r border-zinc-800 flex flex-col">
+            <div class="p-6 border-b border-zinc-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-xl">✦</div>
+                    <div>
+                        <div class="title-font text-2xl font-bold tracking-tighter">NEXUS</div>
+                        <div class="text-xs text-emerald-400 -mt-1">LIVE</div>
+                    </div>
+                </div>
+                <div onclick="logout()" class="cursor-pointer text-zinc-400 hover:text-white transition">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </div>
+            </div>
+
+            <!-- Current User -->
+            <div class="p-4 border-b border-zinc-800 flex items-center gap-3 bg-zinc-900">
+                <div onclick="updateDisplayName()" class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-white font-bold text-xl cursor-pointer" id="user-avatar">
+                    ?
+                </div>
+                <div class="flex-1">
+                    <div onclick="updateDisplayName()" id="display-name" class="font-semibold cursor-pointer hover:text-purple-400 transition">Loading...</div>
+                    <div class="text-xs text-emerald-400 flex items-center gap-1">
+                        <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span> ONLINE
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users / DMs -->
+            <div class="flex-1 overflow-auto custom-scroll p-2" id="users-list">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- CHAT AREA -->
+        <div class="flex-1 flex flex-col chat-bg">
+            <!-- Header -->
+            <div class="h-16 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur-lg px-6 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <i id="chat-icon" class="fa-solid fa-globe text-2xl text-purple-400"></i>
+                    <div id="chat-header" class="font-semibold text-xl">Global Lounge</div>
+                </div>
+                <div class="text-zinc-400 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="online-count">LIVE</span>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="chat-messages" class="flex-1 overflow-auto p-6 space-y-6 custom-scroll">
+                <!-- Messages populated by JS -->
+            </div>
+
+            <!-- Input -->
+            <div class="p-5 border-t border-zinc-800 bg-zinc-900">
+                <div class="relative">
+                    <input id="message-input" 
+                           onkeypress="if(event.key === 'Enter') sendMessage()"
+                           type="text" 
+                           class="w-full bg-zinc-800 border border-zinc-700 focus:border-purple-500 rounded-3xl px-7 py-5 pr-24 outline-none text-lg placeholder-zinc-500"
+                           placeholder="Type a message... (@mention for ping)">
+                    <button onclick="sendMessage()" 
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 px-8 py-3 rounded-3xl font-semibold transition flex items-center gap-2">
+                        SEND <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, set, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyA03hzv7s5wOfbGi1oO5HZ7f779MWpp32Y",
+            authDomain: "chat-room-6ab7b.firebaseapp.com",
+            databaseURL: "https://chat-room-6ab7b-default-rtdb.firebaseio.com",
+            projectId: "chat-room-6ab7b",
+            storageBucket: "chat-room-6ab7b.firebasestorage.app",
+            messagingSenderId: "125112151164",
+            appId: "1:125112151164:web:12e1a32c92e94315a22df9",
+            measurementId: "G-XMF8ZT0GLP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+
+        let currentUser = null;
+        let currentChat = "global";
+        let usersList = {};
+        let unsubscribeMessages = null;
+
+        function showLogin() {
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('main-app').classList.add('hidden');
+        }
+
+        function showMainApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                document.getElementById('display-name').textContent = user.displayName || user.email.split('@')[0];
+                document.getElementById('user-avatar').textContent = (user.displayName || user.email)[0].toUpperCase();
+                showMainApp();
+                loadUsers();
+                initChat();
+            } else {
+                showLogin();
+            }
+        });
+
+        window.login = async () => {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) return alert("Enter credentials");
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (e) {
+                alert("Login error: " + e.message);
+            }
+        };
+
+        window.register = async () => {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            if (!email || !password) return alert("Enter credentials");
+            try {
+                const userCred = await createUserWithEmailAndPassword(auth, email, password);
+                const displayName = email.split('@')[0];
+                await updateProfile(userCred.user, { displayName });
+                await set(ref(db, 'users/' + userCred.user.uid), {
+                    uid: userCred.user.uid,
+                    email: email,
+                    displayName: displayName,
+                    lastActive: serverTimestamp()
+                });
+            } catch (e) {
+                alert("Register error: " + e.message);
+            }
+        };
+
+        window.logout = async () => {
+            if (unsubscribeMessages) unsubscribeMessages();
+            await signOut(auth);
+        };
+
+        window.updateDisplayName = async () => {
+            const newName = prompt("New display name:", currentUser?.displayName || "");
+            if (!newName || !newName.trim() || !currentUser) return;
+            try {
+                await updateProfile(currentUser, { displayName: newName.trim() });
+                await set(ref(db, 'users/' + currentUser.uid + '/displayName'), newName.trim());
+                document.getElementById('display-name').textContent = newName.trim();
+                document.getElementById('user-avatar').textContent = newName.trim()[0].toUpperCase();
+            } catch (e) {
+                alert("Update failed: " + e.message);
+            }
+        };
+
+        function loadUsers() {
+            const usersRef = ref(db, 'users');
+            onValue(usersRef, (snapshot) => {
+                usersList = snapshot.val() || {};
+                renderUsersList();
+            });
+        }
+
+        function renderUsersList() {
+            const container = document.getElementById('users-list');
+            container.innerHTML = `
+                <div onclick="switchChat('global')" class="p-4 hover:bg-zinc-800 cursor-pointer flex items-center gap-3 rounded-2xl mx-2 mb-1 ${currentChat === 'global' ? 'bg-zinc-800' : ''}">
+                    <i class="fa-solid fa-globe text-2xl text-purple-400"></i>
+                    <div class="font-medium">Global Chat</div>
+                </div>
+            `;
+
+            Object.values(usersList).forEach(user => {
+                if (user.uid === currentUser.uid) return;
+                const active = currentChat === user.uid;
+                const div = document.createElement('div');
+                div.className = `p-4 hover:bg-zinc-800 cursor-pointer flex items-center gap-3 rounded-2xl mx-2 mb-1 ${active ? 'bg-zinc-800' : ''}`;
+                div.innerHTML = `
+                    <div class="w-9 h-9 bg-gradient-to-br from-pink-500 to-purple-500 rounded-2xl flex items-center justify-center text-white font-bold">
+                        ${(user.displayName || '?')[0].toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <div class="font-medium">${user.displayName || user.email}</div>
+                        <div class="text-xs text-emerald-400">● online</div>
+                    </div>
+                `;
+                div.onclick = () => switchChat(user.uid);
+                container.appendChild(div);
+            });
+        }
+
+        function switchChat(target) {
+            currentChat = target;
+            document.getElementById('chat-header').textContent = target === 'global' ? 'Global Lounge' : (usersList[target]?.displayName || 'DM');
+            document.getElementById('chat-icon').className = target === 'global' ? 'fa-solid fa-globe text-2xl text-purple-400' : 'fa-solid fa-user text-2xl text-pink-400';
+            renderUsersList();
+            initChat();
+        }
+
+        function initChat() {
+            const chatContainer = document.getElementById('chat-messages');
+            chatContainer.innerHTML = '<div class="text-center text-zinc-500 py-10">Loading messages...</div>';
+
+            if (unsubscribeMessages) unsubscribeMessages();
+
+            let path = currentChat === 'global' ? 'messages/global' : `dms/${sortUids(currentUser.uid, currentChat)}`;
+            const messagesRef = ref(db, path);
+            
+            unsubscribeMessages = onValue(messagesRef, (snapshot) => {
+                chatContainer.innerHTML = '';
+                const msgs = snapshot.val() || {};
+                const sortedKeys = Object.keys(msgs).sort((a, b) => (msgs[a].timestamp || 0) - (msgs[b].timestamp || 0));
+                
+                if (sortedKeys.length === 0) {
+                    chatContainer.innerHTML = `<div class="text-center text-zinc-500 py-20">No messages yet. Say hello!</div>`;
+                    return;
+                }
+
+                sortedKeys.forEach(key => {
+                    const msg = msgs[key];
+                    const isMine = msg.sender === currentUser.uid;
+                    const bubble = document.createElement('div');
+                    bubble.className = `flex ${isMine ? 'justify-end' : 'justify-start'} mb-5`;
+                    bubble.innerHTML = `
+                        <div class="${isMine ? 'bg-violet-600' : 'bg-zinc-700'} max-w-[70%] rounded-3xl px-6 py-3 ${isMine ? 'rounded-br-none' : 'rounded-bl-none'}">
+                            ${!isMine ? `<div class="text-xs text-pink-300 mb-1">${msg.senderName || 'User'}</div>` : ''}
+                            <div>${msg.text}</div>
+                            <div class="text-[10px] text-zinc-400 mt-2 text-right">${msg.timestamp ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</div>
+                        </div>
+                    `;
+                    chatContainer.appendChild(bubble);
+                });
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            });
+        }
+
+        function sortUids(a, b) {
+            return a < b ? a + '_' + b : b + '_' + a;
+        }
+
+        window.sendMessage = async () => {
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            if (!text || !currentUser) return;
+
+            let path = currentChat === 'global' ? 'messages/global' : `dms/${sortUids(currentUser.uid, currentChat)}`;
+            await push(ref(db, path), {
+                sender: currentUser.uid,
+                senderName: currentUser.displayName || currentUser.email,
+                text: text,
+                timestamp: serverTimestamp()
+            });
+            input.value = '';
+        };
+
+        console.log("%cyou found the easter egg dumass", "color:#c026d3;font-weight:bold");
+    </script>
+</body>
+</html>
